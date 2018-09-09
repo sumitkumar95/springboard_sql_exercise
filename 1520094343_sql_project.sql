@@ -27,34 +27,97 @@ exploring the data, and getting acquainted with the 3 tables. */
 /* Q1: Some of the facilities charge a fee to members, but some do not.
 Please list the names of the facilities that do. */
 
+SELECT name
+FROM  Facilities 
+WHERE membercost > 0;
+
+/* name
+Tennis Court 1
+Tennis Court 2
+Massage Room 1
+Massage Room 2
+Squash Court */
 
 /* Q2: How many facilities do not charge a fee to members? */
 
+SELECT COUNT( name ) 
+FROM  Facilities 
+WHERE membercost = 0;
+
+/* COUNT(name)
+4 */
 
 /* Q3: How can you produce a list of facilities that charge a fee to members,
 where the fee is less than 20% of the facility's monthly maintenance cost?
 Return the facid, facility name, member cost, and monthly maintenance of the
 facilities in question. */
+SELECT facid, name, membercost, monthlymaintenance
+FROM Facilities
+WHERE membercost > 0 AND (membercost < monthlymaintenance*.2);
 
+/*facid	name	membercost	monthlymaintenance	
+0	Tennis Court 1	5.0	200
+1	Tennis Court 2	5.0	200
+4	Massage Room 1	9.9	3000
+5	Massage Room 2	9.9	3000
+6	Squash Court	3.5	80*/
 
 /* Q4: How can you retrieve the details of facilities with ID 1 and 5?
 Write the query without using the OR operator. */
 
+SELECT *
+FROM Facilities
+WHERE facid IN (1,5);
+
+/* name	membercost	guestcost	facid	initialoutlay	monthlymaintenance	
+Tennis Court 2	5.0	25.0	1	8000	200
+Massage Room 2	9.9	80.0	5	4000	3000 */
 
 /* Q5: How can you produce a list of facilities, with each labelled as
 'cheap' or 'expensive', depending on if their monthly maintenance cost is
 more than $100? Return the name and monthly maintenance of the facilities
 in question. */
 
+SELECT name, 
+CASE WHEN monthlymaintenance > 100
+THEN  'expensive'
+ELSE  'cheap'
+END AS  "cost"
+FROM Facilities;
+
+/*name	cost	
+Tennis Court 1	expensive
+Tennis Court 2	expensive
+Badminton Court	cheap
+Table Tennis	cheap
+Massage Room 1	expensive
+Massage Room 2	expensive
+Squash Court	cheap
+Snooker Table	cheap
+Pool Table	cheap*/
 
 /* Q6: You'd like to get the first and last name of the last member(s)
 who signed up. Do not use the LIMIT clause for your solution. */
 
+SELECT firstname, surname, joindate
+FROM Members
+WHERE joindate = (
+SELECT MAX(joindate) 
+FROM Members
+);
+
+/*firstname	surname	joindate	
+Darren	Smith	2012-09-26 18:08:45*/
 
 /* Q7: How can you produce a list of all members who have used a tennis court?
 Include in your output the name of the court, and the name of the member
 formatted as a single column. Ensure no duplicate data, and order by
 the member name. */
+SELECT DISTINCT Members.firstname, Members.surname, Facilities.name
+FROM Members
+INNER JOIN Bookings ON Members.memid = Bookings.memid
+INNER JOIN Facilities ON Bookings.facid = Facilities.facid
+WHERE Facilities.name LIKE  'Tennis Court%';
 
 
 /* Q8: How can you produce a list of bookings on the day of 2012-09-14 which
